@@ -8,6 +8,7 @@ const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")
 
 app.use(cors());
+app.use(express.json());
 
 app.use("/records", recordsRouter)
 app.use("/user", userRouter)

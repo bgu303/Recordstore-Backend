@@ -13,13 +13,13 @@ router.post("/createuser", async (req, res) => {
     const values = [email, hashedPassword, role];
 
     dbConnection.query(query, values, (error, results) => {
-
-        if (error.errno === 1062) {
-            return res.status(501).json({ error: "Internal Server Error."});
-        }
         if (error) {
-            console.log(error);
+            if (error.errno === 1062) {
+                return res.status(501).json({ error: "Internal Server Error."});
+            } else {
+                console.log(error);
             return res.status(500).json({ error: "Internal Server Error."});
+            }
         }
         if (results.affectedRows === 1) {
             console.log("User created successfully.");
@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
             return res.status(401).json({ error: "Invalid email or password" });
         }
     
-        const token = jwt.sign({ userId: user.id, email: user.email, user_role: user.user_role }, 'your-secret-key', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id, email: user.email, userRole: user.user_role }, 'your-secret-key', { expiresIn: '1h' });
         console.log(`Logging in with token: ${token}`);
         res.status(200).json({ success: true, token });
 
