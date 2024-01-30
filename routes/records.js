@@ -55,11 +55,28 @@ router.delete("/shoppingcartdelete/:id", (req, res) => {
             return res.status(500).json({ error: "Internal Server Error" });
         }
         if (results.affectedRows === 0) {
-            console.log("asd")
             return res.status(404).json({ error: "Nothing deleted." });
         }
         res.json({ success: true, message: "Record deleted successfully" });
         console.log(`Record deleted with id: ${recordId}`);
+    })
+})
+
+router.delete("/shoppingcartdeleteall/:id", (req, res) => {
+    const userId = req.params.id;
+    const query = "DELETE FROM shoppingcart WHERE user_id = ?";
+
+    dbConnection.query(query, [userId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error. "});
+        }
+        if (results.affectedRows === 0) {
+            console.log("Nothing deleted");
+            return res.status(404).json({ error: "Nothing deleted." });
+        }
+        res.json({ success: true, message: "Records deleted successfully."});
+        console.log("Records deleted successfully");
     })
 })
 
