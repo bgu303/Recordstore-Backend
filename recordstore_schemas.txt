@@ -1,0 +1,26 @@
+CREATE TABLE recordstoreusers (
+  id INT AUTO_INCREMENT,
+  email VARCHAR(100) NOT NULL,
+  user_password VARCHAR(255) NOT NULL,
+  user_role VARCHAR(50) NOT NULL,
+  PRIMARY KEY (email),
+  UNIQUE (id)
+);
+
+CREATE TABLE shoppingcart (
+  user_id INT,
+  record_id INT,
+  PRIMARY KEY (user_id, record_id),
+  FOREIGN KEY (user_id) REFERENCES recordstoreusers (id),
+  FOREIGN KEY (record_id) REFERENCES rec (id)
+);
+
+CREATE TABLE shoppingcart (
+  user_id INT,
+  record_id INT,
+  PRIMARY KEY (record_id),
+  FOREIGN KEY (user_id) REFERENCES recordstoreusers (id),
+  FOREIGN KEY (record_id) REFERENCES rec (id)
+);
+
+DROP TABLE shoppingcart;

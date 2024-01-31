@@ -88,7 +88,6 @@ router.post("/addtocart", (req, res) => {
     dbConnection.query(query, values, (error, results) => {
         if (error) {
             if (error.errno === 1062) {
-                console.log(error);
                 return res.status(501).json({ error: "Internal Server Error." });
             } else {
                 console.log(error)
