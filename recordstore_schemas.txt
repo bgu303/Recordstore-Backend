@@ -1,3 +1,17 @@
+CREATE TABLE rec (
+    id INT AUTO_INCREMENT,
+    artist VARCHAR(255),
+    size VARCHAR(255),
+    label VARCHAR(255),
+    title VARCHAR(255),
+	  kan VARCHAR(255),
+    lev VARCHAR(255),
+    price DOUBLE,
+    discogs VARCHAR(255),
+    genre VARCHAR(255),
+    PRIMARY key (id)
+);
+
 CREATE TABLE recordstoreusers (
   id INT AUTO_INCREMENT,
   email VARCHAR(100) NOT NULL,
