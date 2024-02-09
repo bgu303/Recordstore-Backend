@@ -6,11 +6,11 @@ const passwordCloud = process.env.DATABASE_CLOUD_PASSWORD
 const hostname = process.env.HOSTNAME_CLOUD
 
 const dbConnection = mysql.createConnection({
-    host: hostname,
-    user: usernameCloud,
-    password: passwordCloud,
+    host: "localhost",
+    user: username,
+    password: password,
     port: 3306,
-    database: "recordstore"
+    database: "webstoredatabase"
 });
 
 module.exports = dbConnection
