@@ -101,10 +101,10 @@ router.post("/sendcart", (req, res) => {
         Tilaajan nimi: ${customerInfo.name}
         Tilaajan puhelinnumero: ${customerInfo.phoneNumber}
         Tilaajan sähköposti: ${customerInfo.email}
-        Tilaajan osoite: ${customerInfo.address}
-        Tilaajan postinumero: ${customerInfo.zipCode}
-        Tilaajan kaupunki: ${customerInfo.city}
         Tilaajan maksuvalinta: ${customerInfo.paymentOption}
+        Toimitustapa: ${customerInfo.shippingOption}
+        Tilaajan osoite:
+        ${customerInfo.address}
     `
 
     const formattedItems = shoppingcart.map(item => {
