@@ -54,7 +54,19 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign({ userId: user.id, email: user.email, userRole: user.user_role }, 'your-secret-key', { expiresIn: '1h' });
         console.log(`Logging in with token: ${token}`);
         res.status(200).json({ success: true, token });
+    })
+})
 
+router.get("/getallusers", (req, res) => {
+    const query = "SELECT * FROM recordstoreusers";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.json(501).json({ error: "Internal Server Error "});
+        } else {
+            res.json(results);
+        }
     })
 })
 
