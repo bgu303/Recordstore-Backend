@@ -2,24 +2,7 @@ const express = require("express");
 const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-const jwt = require('jsonwebtoken');
-
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(403).json({ error: "Invalid token" });
-    }
-
-    jwt.verify(token, 'your-secret-key', (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: "Invalid token" });
-        }
-        req.user = user;
-        next();
-    });
-}
+const authenticateToken = require("../middleware/authMiddleware");
 
 router.get("/shoppingcartitems/:id", authenticateToken, (req, res) => {
     const userId = req.params.id;
