@@ -3,58 +3,6 @@ const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
 const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/createconversation", (req, res) => {
-    const userId = req.body.userId;
-
-    //This stops it from crashing if you press refresh on chat page,
-    //However, now chat cannot be opened without navigating off from the page.
-    //Needs a fix later.
-    if (userId === null) {
-        return;
-    }
-    const adminId = 14;
-
-    const query = `
-    INSERT INTO conversations (user1_id, user2_id)
-    SELECT ?, ?
-    FROM dual
-    WHERE NOT EXISTS (
-        SELECT 1
-        FROM conversations
-        WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
-    )
-    LIMIT 1;
-  `;
-
-    const checkExistingQuery = `
-    SELECT id
-    FROM conversations
-    WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
-  `;
-
-    dbConnection.query(query, [userId, adminId, userId, adminId, adminId, userId], (error, results) => {
-        if (error) {
-            console.log(error);
-            return res.status(500).json({ error: "Internal Server Error" });
-        }
-        if (results.affectedRows === 1) {
-            console.log("Message saved successfully.");
-            return res.status(201).json({ success: true, message: "Message sent successfully." })
-        } else if (results.affectedRows === 0) {
-            dbConnection.query(checkExistingQuery, [userId, adminId, userId, adminId], (error, results) => {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log(results);
-                    res.json(results);
-                }
-            })
-        }
-    })
-})
-
-router.get("/getconversationid/")
-
 router.post("/sendmessage", (req, res) => {
     const userId = req.body.userId;
     const conversationId = req.body.conversationId;
