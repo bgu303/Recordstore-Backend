@@ -53,6 +53,8 @@ router.post("/createconversation", (req, res) => {
     })
 })
 
+router.get("/getconversationid/")
+
 router.post("/sendmessage", (req, res) => {
     const userId = req.body.userId;
     const conversationId = req.body.conversationId;
@@ -101,6 +103,22 @@ router.post("/adminsendmessage", (req, res) => {
                     return res.status(201).json({ success: true, message: "Message sent successfully." })
                 }
             })
+        }
+    })
+})
+
+router.get("/getconversationid/:id", (req, res) => {
+    const userId = req.params.id;
+    const adminId = 14;
+
+    const query = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
+
+    dbConnection.query(query, [userId, adminId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error"});
+        } else {
+            res.json(results);
         }
     })
 })

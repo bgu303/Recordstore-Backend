@@ -10,7 +10,10 @@ router.post("/createuser", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = "INSERT INTO recordstoreusers (email, user_password, user_role) VALUES (?, ?, ?)";
+    const createConvoQuery = "INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)";
     const values = [email, hashedPassword, role];
+    let createdUserId;
+    let adminId = 14;
 
     dbConnection.query(query, values, (error, results) => {
         if (error) {
@@ -22,8 +25,16 @@ router.post("/createuser", async (req, res) => {
             }
         }
         if (results.affectedRows === 1) {
-            console.log("User created successfully.");
-            return res.status(201).json({ success: true, message: "User created successfully" });
+            createdUserId = results.insertId;
+            dbConnection.query(createConvoQuery, [createdUserId, adminId], (error, results) => {
+                if (error) {
+                    console.log(error);
+                    return res.status(501).json({ error: "Internal Server Error"});
+                } else {
+                    console.log("User created successfully.");
+                    return res.status(201).json( {success: true, message: "User created successfully"});
+                }
+            })
         } else {
             return res.status(500).json({ error: "Failed to create user" });
         }
