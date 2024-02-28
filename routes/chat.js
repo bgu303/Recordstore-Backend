@@ -3,6 +3,31 @@ const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
 const authenticateToken = require("../middleware/authMiddleware");
 
+let adminId;
+
+//Fetch admin ID from database upon server startup.
+//Admin ID later used in other chat related endpoints.
+//eg. to define which conversation to fetch.
+const fetchAdminId = () => {
+    const query = "SELECT id FROM recordstoreusers WHERE user_role = 'ADMIN'";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log("Failed to fetch admin ID: " + error);
+            return;
+        }
+        if (results.length > 0) {
+            adminId = results[0].id;
+            console.log("Admin ID fetched successfully: " + adminId);
+        } else {
+            console.log("Admin ID not found.");
+        }
+    })
+}
+
+//Call fetchAdminId function when the server starts.
+fetchAdminId();
+
 router.post("/sendmessage", (req, res) => {
     const userId = req.body.userId;
     const conversationId = req.body.conversationId;
@@ -28,8 +53,6 @@ router.post("/adminsendmessage", (req, res) => {
     const message = req.body.message;
 
     let conversationId;
-    const adminId = 14;
-
     const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)";
 
     dbConnection.query(searchConversationIdQuery, [selectedUser, adminId, selectedUser, adminId], (error, results) => {
@@ -87,7 +110,6 @@ router.get("/getconversationmessages/:conversationid", (req, res) => {
 
 router.get("/admingetconversationmessages/:selecteduser", (req, res) => {
     const selectedUser = req.params.selecteduser;
-    const adminId = 14;
     let conversationId;
 
     const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)";
