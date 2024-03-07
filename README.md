@@ -7,6 +7,7 @@ This is the back-end part for my record store I am doing for my dad :)
 - Express for back-end endpoints.
 - JSON Web Token (jwt) used to manage users.
 - Bcrypt for password encryption and decryption.
+- Socket.IO for real-time chat. More information can be found at: https://socket.io/
 
 ## Features
 - **User management:** Authentication mechanisms ensure secure access to the system.
