@@ -15,6 +15,12 @@ router.get("/", (req, res) => {
     })
 })
 
+
+//Used to test cloud implementation, delete later.
+router.get("/test", (req, res) => {
+    res.send("Test working");
+})
+
 router.delete("/:id", (req, res) => {
     const recordId = req.params.id;
     const query = "DELETE FROM rec WHERE id = ?";
