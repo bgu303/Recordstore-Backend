@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
     dbConnection.query(query, (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ error: "Internal Server Error" });
+            return res.status(500).json({ error: "Internal Server Error" + error});
         } else {
             res.json(results);
         }
