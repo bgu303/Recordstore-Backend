@@ -13,6 +13,8 @@ const io = socketIo(server, {
     }
   });
 
+  const userSockets = {}
+
 const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")
 const shoppingcartRouter = require("./routes/shoppingcart")
@@ -27,8 +29,14 @@ app.use("/shoppingcart", shoppingcartRouter)
 app.use("/chat", chatRouter)
 
 io.on('connection', (socket) => {
+
+  socket.on("joinRoom", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
+  })
+
     socket.on("sendMessage", (message) => {
-        console.log(`Message was sent ${message}`);
+        console.log(`Message was sent ${message} with token ${socket.id}`);
         io.emit("message", message)
     });
 });

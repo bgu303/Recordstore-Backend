@@ -80,8 +80,7 @@ router.post("/adminsendmessage", (req, res) => {
 
 router.get("/getconversationid/:id", (req, res) => {
     const userId = req.params.id;
-    const adminId = 14;
-
+   
     const query = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
 
     dbConnection.query(query, [userId, adminId], (error, results) => {
@@ -132,5 +131,6 @@ router.get("/admingetconversationmessages/:selecteduser", (req, res) => {
         }
     })
 })
+
 
 module.exports = router;
