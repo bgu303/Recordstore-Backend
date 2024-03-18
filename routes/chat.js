@@ -93,6 +93,21 @@ router.get("/getconversationid/:id", (req, res) => {
     })
 })
 
+router.get("/admingetconversationid/:userid", (req, res) => {
+    const userId = req.params.userid;
+
+    const query = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
+
+    dbConnection.query(query, [userId, adminId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error"} );
+        } else {
+            res.json(results);
+        }
+    })
+})
+
 router.get("/getconversationmessages/:conversationid", (req, res) => {
     const conversationId = req.params.conversationid;
     const query = "SELECT * FROM messages WHERE conversation_id = ?";

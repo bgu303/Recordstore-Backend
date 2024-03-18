@@ -30,14 +30,15 @@ app.use("/chat", chatRouter)
 
 io.on('connection', (socket) => {
 
-  socket.on("joinRoom", (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined room`);
+  socket.on("joinRoom", (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation ${conversationId}`);
   })
 
-    socket.on("sendMessage", (message) => {
-        console.log(`Message was sent ${message} with token ${socket.id}`);
-        io.emit("message", message)
+    socket.on("sendMessage", (data) => {
+      const { message, conversationId } = data
+        console.log(`Message was sent ${message} in conversation ${conversationId} with token ${socket.id}`);
+        io.to(conversationId).emit("message", data)
     });
 });
 
