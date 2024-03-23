@@ -126,7 +126,7 @@ router.get("/admingetconversationmessages/:selecteduser", (req, res) => {
     const selectedUser = req.params.selecteduser;
     let conversationId;
 
-    const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)";
+    const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)"; //Fix
 
     dbConnection.query(searchConversationIdQuery, [selectedUser, adminId, selectedUser, adminId], (error, results) => {
         if (error) {

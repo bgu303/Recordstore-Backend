@@ -8,7 +8,7 @@ const port = process.env.PORT || 3001
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-      origin: "http://localhost:3000", // Allow requests from this origin, remember to change when cloud implemented.
+      origin: "*", // Allow requests from all origins, REMEMBER TO CHANGE LATER!
       methods: ["GET", "POST"] // Allow only specified methods
     }
   });
