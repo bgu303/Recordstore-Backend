@@ -5,6 +5,27 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 router.use(express.json());
 
+let adminId;
+
+const fetchAdminId = () => {
+    const query = "SELECT id FROM recordstoreusers WHERE user_role = 'ADMIN'";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log("Failed to fetch admin ID: " + error);
+            return;
+        }
+        if (results.length > 0) {
+            adminId = results[0].id;
+            console.log("Admin ID fetched successfully: " + adminId);
+        } else {
+            console.log("Admin ID not found.");
+        }
+    })
+}
+
+fetchAdminId();
+
 router.post("/createuser", async (req, res) => {
     const { email, password, role } = req.body;
 
@@ -18,10 +39,10 @@ router.post("/createuser", async (req, res) => {
     dbConnection.query(query, values, (error, results) => {
         if (error) {
             if (error.errno === 1062) {
-                return res.status(501).json({ error: "Internal Server Error."});
+                return res.status(501).json({ error: "Internal Server Error." });
             } else {
                 console.log(error);
-            return res.status(500).json({ error: "Internal Server Error."});
+                return res.status(500).json({ error: "Internal Server Error." });
             }
         }
         if (results.affectedRows === 1) {
@@ -29,10 +50,10 @@ router.post("/createuser", async (req, res) => {
             dbConnection.query(createConvoQuery, [createdUserId, adminId], (error, results) => {
                 if (error) {
                     console.log(error);
-                    return res.status(501).json({ error: "Internal Server Error"});
+                    return res.status(501).json({ error: "Internal Server Error" });
                 } else {
                     console.log("User created successfully.");
-                    return res.status(201).json( {success: true, message: "User created successfully"});
+                    return res.status(201).json({ success: true, message: "User created successfully" });
                 }
             })
         } else {
@@ -61,12 +82,83 @@ router.post("/login", async (req, res) => {
         if (!passwordChecker) {
             return res.status(401).json({ error: "Invalid email or password" });
         }
-    
+
         const token = jwt.sign({ userId: user.id, email: user.email, userRole: user.user_role }, 'your-secret-key', { expiresIn: '1h' });
         console.log(`Logging in with token: ${token}`);
         res.status(200).json({ success: true, token });
     })
 })
+
+router.post("/deleteuser", async (req, res) => {
+    const { email, password } = req.body;
+    const query = "SELECT * FROM recordstoreusers WHERE email = ?";
+    const conversationQuery = "SELECT * FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
+    let conversationId;
+
+    dbConnection.query(query, [email], async (error, results) => {
+        if (error) {
+            console.log(`Error deleting user: ${error}`);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        const user = results[0];
+        const passwordChecker = await bcrypt.compare(password, user.user_password);
+
+        if (!passwordChecker) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        dbConnection.query(conversationQuery, [user.id, adminId], (error, results) => {
+            if (error) {
+                console.log(`Error fetching conversation id: ${error}`);
+                return res.status(500).json({ error: "Internal Server Error" });
+            }
+
+            if (results.length === 0) {
+                console.log("Conversation not found for deletion.");
+                return res.status(200).json({ message: "User and related data deleted successfully" });
+            }
+
+            conversationId = results[0].id;
+
+            // Delete messages first
+            const deleteMessagesQuery = "DELETE FROM messages WHERE conversation_id = ?";
+            dbConnection.query(deleteMessagesQuery, [conversationId], (messageError, messageResults) => {
+                if (messageError) {
+                    console.log(messageError);
+                    return res.status(500).json({ error: "Internal Server Error" });
+                }
+
+                // Delete conversations
+                const deleteConversationQuery = "DELETE FROM conversations WHERE id = ?";
+                dbConnection.query(deleteConversationQuery, [conversationId], (conversationError, conversationResults) => {
+                    if (conversationError) {
+                        console.log(conversationError);
+                        return res.status(500).json({ error: "Internal Server Error" });
+                    }
+
+                    // Delete user
+                    const deleteUserQuery = "DELETE FROM recordstoreusers WHERE email = ?";
+                    dbConnection.query(deleteUserQuery, [email], (deleteError, deleteResults) => {
+                        if (deleteError) {
+                            console.log(`Error deleting user: ${deleteError}`);
+                            return res.status(500).json({ error: "Internal Server Error" });
+                        }
+
+                        console.log("User and related data deleted successfully.");
+                        return res.status(200).json({ message: "User and related data deleted successfully" });
+                    });
+                });
+            });
+        });
+    });
+});
+
+
 
 router.get("/getallusers", (req, res) => {
     const query = "SELECT * FROM recordstoreusers";
@@ -74,7 +166,7 @@ router.get("/getallusers", (req, res) => {
     dbConnection.query(query, (error, results) => {
         if (error) {
             console.log(error);
-            return res.json(501).json({ error: "Internal Server Error "});
+            return res.json(501).json({ error: "Internal Server Error " });
         } else {
             res.json(results);
         }
