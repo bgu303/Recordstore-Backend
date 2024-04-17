@@ -56,5 +56,23 @@ CREATE TABLE messages (
     FOREIGN KEY (sender_id) REFERENCES recordstoreusers(id)
 );
 
+CREATE TABLE orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  customer_name VARCHAR(255),
+  customer_phone VARCHAR(255),
+  customer_email VARCHAR(255),
+  customer_paymentoption VARCHAR(255),
+  customer_shippingoption VARCHAR(255),
+  customer_address VARCHAR(255),
+  FOREIGN KEY (user_id) REFERENCES recordstoreusers (id) ON DELETE CASCADE
+);
+
+CREATE TABLE order_items (
+  order_id INT,
+  record_id INT,
+  FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
+	FOREIGN KEY (record_id) REFERENCES rec (id) ON DELETE CASCADE
+);
 
 DROP TABLE shoppingcart;
