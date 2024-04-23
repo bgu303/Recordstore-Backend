@@ -45,11 +45,11 @@ router.post("/addnewrecord", (req, res) => {
 
     dbConnection.query(query, values, (error, results) => {
         if (error) {
-            return res.status(501).json({ error: "Internal Server Error. " });
+            return res.status(501).json({ error: "Internal Server Error." });
         }
         if (results.affectedRows === 1) {
             console.log("New record added successfully");
-            return res.status(201).json({ success: true, message: "New record added successfully" });
+            return res.status(201).json({ success: true, message: "New record added successfully." });
         }
     })
 })

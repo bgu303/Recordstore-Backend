@@ -73,7 +73,7 @@ router.post("/addtocart", (req, res) => {
     })
 })
 
-router.post("/sendcart", (req, res) => {
+router.post("/sendcart2", (req, res) => {
     const sgMail = require('@sendgrid/mail');
     sgMail.setApiKey(SENDGRID_API_KEY);
 
@@ -127,6 +127,43 @@ router.post("/sendcart", (req, res) => {
         .catch((error) => {
             console.error(error)
         })
+})
+
+router.post("/sendcart", (req, res) => {
+    const { customerInfo, userId, shoppingcart } = req.body;
+    console.log(shoppingcart)
+    let orderId = "";
+
+    const orderQuery = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, customer_paymentoption, customer_shippingoption, customer_address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const orderItemsQuery = "INSERT INTO order_items (order_id, record_id) VALUES (?, ?)";
+
+    dbConnection.query(orderQuery, [userId, customerInfo.name, customerInfo.phoneNumber, customerInfo.email, customerInfo.paymentOption, customerInfo.shippingOption, customerInfo.address], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error." });
+        }
+        if (results.affectedRows === 1) {
+            orderId = results.insertId;
+            console.log("Inserting customer data successfully.");
+        }
+
+        shoppingcart.forEach(item => {
+            dbConnection.query(orderItemsQuery, [orderId, item.id], (error, results) => {
+                if (error) {
+                    console.log(error);
+                    return res.status(501).json({ error: "Internal Server Error." });
+                }
+                if (results.affectedRows === 1) {
+                    console.log("Inserting order item successfully.");
+                }
+            })
+        })
+        return res.status(201).json({ success: true, message: "New order item added successfully." })
+    })
+})
+
+router.get("/getcart", (req, res) => {
+    res.send("vittu mooro");
 })
 
 module.exports = router;

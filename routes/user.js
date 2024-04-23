@@ -89,6 +89,7 @@ router.post("/login", async (req, res) => {
     })
 })
 
+//Idk, it is a fucking mess because I didn't use DELETE ON CASCADE, I will maybe change it later, MAYBE NOT:)
 router.post("/deleteuser", async (req, res) => {
     const { email, password } = req.body;
     const query = "SELECT * FROM recordstoreusers WHERE email = ?";
@@ -119,8 +120,16 @@ router.post("/deleteuser", async (req, res) => {
             }
 
             if (results.length === 0) {
-                console.log("Conversation not found for deletion.");
-                return res.status(200).json({ message: "User and related data deleted successfully" });
+                const deleteUserQuery = "DELETE FROM recordstoreusers WHERE email = ?";
+                dbConnection.query(deleteUserQuery, [email], (deleteError, deleteResults) => {
+                    if (deleteError) {
+                        console.log(`Error deleting user: ${deleteError}`);
+                        return res.status(500).json({ error: "Internal Server Error" });
+                    }
+
+                    console.log("User and related data deleted successfully.");
+                    return res.status(200).json({ message: "User and related data deleted successfully" });
+                });
             }
 
             conversationId = results[0].id;
@@ -157,8 +166,6 @@ router.post("/deleteuser", async (req, res) => {
         });
     });
 });
-
-
 
 router.get("/getallusers", (req, res) => {
     const query = "SELECT * FROM recordstoreusers";
