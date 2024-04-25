@@ -8,13 +8,12 @@ router.get("/", (req, res) => {
     dbConnection.query(query, (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ error: "Internal Server Error" + error});
+            return res.status(500).json({ error: "Internal Server Error" + error });
         } else {
             res.json(results);
         }
     })
 })
-
 
 //Used to test cloud implementation, delete later.
 router.get("/test", (req, res) => {
@@ -50,6 +49,38 @@ router.post("/addnewrecord", (req, res) => {
         if (results.affectedRows === 1) {
             console.log("New record added successfully");
             return res.status(201).json({ success: true, message: "New record added successfully." });
+        }
+    })
+})
+
+router.get("/updatesoldstatustosold/:id", (req, res) => {
+    const { id } = req.params;
+    const query = "UPDATE rec SET sold = true WHERE id = ?";
+
+    dbConnection.query(query, [id], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error. " });
+        }
+        if (results.affectedRows === 1) {
+            console.log("Sold status updated correctly.")
+            return res.status(201).json({ success: true, message: "Sold status updated correctly." });
+        }
+    })
+})
+
+router.get("/updatesoldstatustonotsold/:id", (req, res) => {
+    const { id } = req.params;
+    const query = "UPDATE rec SET sold = false WHERE id = ?";
+
+    dbConnection.query(query, [id], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error. " });
+        }
+        if (results.affectedRows === 1) {
+            console.log("Sold status updated correctly.")
+            return res.status(201).json({ success: true, message: "Sold status updated correctly." });
         }
     })
 })
