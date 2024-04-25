@@ -39,9 +39,9 @@ router.delete("/:id", (req, res) => {
 })
 
 router.post("/addnewrecord", (req, res) => {
-    const { artist, title, label, size, lev, kan, price, genre, discogs } = req.body;
-    const query = "INSERT INTO rec (artist, title, label, size, lev, kan, price, genre, discogs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    const values = [artist, title, label, size, lev, kan, price, genre, discogs];
+    const { artist, title, label, size, lev, kan, price, genre, discogs, sold } = req.body;
+    const query = "INSERT INTO rec (artist, title, label, size, lev, kan, price, genre, discogs, sold) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const values = [artist, title, label, size, lev, kan, price, genre, discogs, sold];
 
     dbConnection.query(query, values, (error, results) => {
         if (error) {

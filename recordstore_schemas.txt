@@ -9,6 +9,7 @@ CREATE TABLE rec (
     price DOUBLE,
     discogs VARCHAR(255),
     genre VARCHAR(255),
+    sold BOOLEAN DEFAULT false,
     PRIMARY key (id)
 );
 
