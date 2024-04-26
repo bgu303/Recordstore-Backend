@@ -136,6 +136,7 @@ router.post("/sendcart", (req, res) => {
 
     const orderQuery = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, customer_paymentoption, customer_shippingoption, customer_address) VALUES (?, ?, ?, ?, ?, ?, ?)";
     const orderItemsQuery = "INSERT INTO order_items (order_id, record_id) VALUES (?, ?)";
+    const soldQuery = "UPDATE rec SET sold = true WHERE id = ?";
 
     dbConnection.query(orderQuery, [userId, customerInfo.name, customerInfo.phoneNumber, customerInfo.email, customerInfo.paymentOption, customerInfo.shippingOption, customerInfo.address], (error, results) => {
         if (error) {
@@ -147,6 +148,7 @@ router.post("/sendcart", (req, res) => {
             console.log("Inserting customer data successfully.");
         }
 
+        //Loops shoppingcart items, first it inserts order item (the record) to order_items table, and then on row (results.affectedRows === 1) marks the item as sold in the rec table.
         shoppingcart.forEach(item => {
             dbConnection.query(orderItemsQuery, [orderId, item.id], (error, results) => {
                 if (error) {
@@ -155,6 +157,15 @@ router.post("/sendcart", (req, res) => {
                 }
                 if (results.affectedRows === 1) {
                     console.log("Inserting order item successfully.");
+                    dbConnection.query(soldQuery, [item.id], (error, results) => {
+                        if (error) {
+                            console.log(error);
+                            return res.status(501).json({ error: "Internal Server Error." });
+                        }
+                        if (results.affectedRows === 1) {
+                            console.log("Updating sold status successfully.");
+                        }
+                    })
                 }
             })
         })
@@ -162,8 +173,25 @@ router.post("/sendcart", (req, res) => {
     })
 })
 
-router.get("/getcart", (req, res) => {
-    res.send("vittu mooro");
-})
+router.get("/getorderdata", (req, res) => {
+
+    //GPT-magic. :) The query returns all of the order items with the order details aswell. So, grouping is needed on front-end side to only show customer data once, then item data.
+    const query = `SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price
+    FROM orders o
+    INNER JOIN order_items oi ON o.id = oi.order_id
+    INNER JOIN rec r ON oi.record_id = r.id;
+    `;
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error." });
+        } else {
+            console.log(results)
+            res.json(results);
+        }
+    });
+});
+
 
 module.exports = router;
