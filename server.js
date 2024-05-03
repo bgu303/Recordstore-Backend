@@ -19,6 +19,7 @@ const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")
 const shoppingcartRouter = require("./routes/shoppingcart")
 const chatRouter = require("./routes/chat")
+const orderRouter = require("./routes/orders")
 
 app.use(cors());
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use("/records", recordsRouter)
 app.use("/user", userRouter)
 app.use("/shoppingcart", shoppingcartRouter)
 app.use("/chat", chatRouter)
+app.use("/orders", orderRouter)
 
 io.on('connection', (socket) => {
 

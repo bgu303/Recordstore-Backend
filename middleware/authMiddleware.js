@@ -21,7 +21,6 @@ function authenticateToken(req, res, next) {
 function authenticateAdminToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    console.log(token)
     
     if (!token) {
         return res.status(403).json({ error: "Invalid token" });

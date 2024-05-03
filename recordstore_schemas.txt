@@ -66,6 +66,7 @@ CREATE TABLE orders (
   customer_paymentoption VARCHAR(255),
   customer_shippingoption VARCHAR(255),
   customer_address VARCHAR(255),
+  order_date DATETIME
   FOREIGN KEY (user_id) REFERENCES recordstoreusers (id) ON DELETE CASCADE
 );
 
