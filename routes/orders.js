@@ -22,6 +22,27 @@ router.get("/getorderdata", authenticateAdminToken, (req, res) => {
     });
 });
 
+router.get("/getorderdatabyid/:id", (req, res) => {
+    const userId = req.params.id
+
+    const query = `
+        SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price
+        FROM orders o
+        INNER JOIN order_items oi ON o.id = oi.order_id
+        INNER JOIN rec r ON oi.record_id = r.id
+        WHERE o.user_id = ?;`;
+
+    // Execute the query with userId as a parameter
+    dbConnection.query(query, [userId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error." });
+        } else {
+            res.json(results);
+        }
+    });
+})
+
 router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
     const orderId = req.params.id;
     const getOrderItemsQuery = "SELECT record_id FROM order_items WHERE order_id = ?"
