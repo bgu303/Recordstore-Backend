@@ -32,7 +32,6 @@ router.get("/getorderdatabyid/:id", (req, res) => {
         INNER JOIN rec r ON oi.record_id = r.id
         WHERE o.user_id = ?;`;
 
-    // Execute the query with userId as a parameter
     dbConnection.query(query, [userId], (error, results) => {
         if (error) {
             console.log(error);
@@ -51,7 +50,7 @@ router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
 
     //First gets the record ids associated with the order (used to set status later)
     //Secondly, the order is deleted (order items will be deleted on order deletion)
-    //Third, updates the status of sold items of the order back to false, based on the fetched record ids in the first step.
+    //Third, updates the status of sold items of the order back set to false, based on the fetched record ids in the first step.
     dbConnection.query(getOrderItemsQuery, [orderId], (error, results) => {
         const recordIds = results.map(row => row.record_id);
         
