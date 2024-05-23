@@ -147,4 +147,30 @@ router.get("/admingetconversationmessages/:selecteduser", (req, res) => {
     })
 })
 
+router.get("/getallconversationmessages", (req, res) => {
+    const query = "SELECT * FROM messages";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        } else {
+            res.json(results);
+        }
+    })
+})
+
+router.get("/getallconversationids", (req, res) => {
+    const query = "SELECT id FROM conversations";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        } else {
+            res.json(results);
+        }
+    })
+})
+
 module.exports = router;
