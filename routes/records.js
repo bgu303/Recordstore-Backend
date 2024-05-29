@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
+const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
 router.get("/", (req, res) => {
     const query = "SELECT * FROM rec";
@@ -20,7 +21,7 @@ router.get("/test", (req, res) => {
     res.send("Test working");
 })
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", authenticateAdminToken, (req, res) => {
     const recordId = req.params.id;
     const query = "DELETE FROM rec WHERE id = ?";
 
@@ -37,7 +38,7 @@ router.delete("/:id", (req, res) => {
     })
 })
 
-router.post("/addnewrecord", (req, res) => {
+router.post("/addnewrecord", authenticateAdminToken, (req, res) => {
     const { artist, title, label, size, lev, kan, price, genre, discogs, sold } = req.body;
     const query = "INSERT INTO rec (artist, title, label, size, lev, kan, price, genre, discogs, sold) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     const values = [artist, title, label, size, lev, kan, price, genre, discogs, sold];
@@ -53,7 +54,7 @@ router.post("/addnewrecord", (req, res) => {
     })
 })
 
-router.get("/updatesoldstatustosold/:id", (req, res) => {
+router.get("/updatesoldstatustosold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
     const query = "UPDATE rec SET sold = true WHERE id = ?";
 
@@ -69,7 +70,7 @@ router.get("/updatesoldstatustosold/:id", (req, res) => {
     })
 })
 
-router.get("/updatesoldstatustonotsold/:id", (req, res) => {
+router.get("/updatesoldstatustonotsold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
     const query = "UPDATE rec SET sold = false WHERE id = ?";
 

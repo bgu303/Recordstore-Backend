@@ -13,8 +13,6 @@ const io = socketIo(server, {
     }
   });
 
-  const userSockets = {}
-
 const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")
 const shoppingcartRouter = require("./routes/shoppingcart")

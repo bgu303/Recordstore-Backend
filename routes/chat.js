@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
-const authenticateToken = require("../middleware/authMiddleware");
+const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
 let adminId;
 
@@ -28,7 +28,7 @@ const fetchAdminId = () => {
 //Call fetchAdminId function when the server starts.
 fetchAdminId();
 
-router.post("/sendmessage", (req, res) => {
+router.post("/sendmessage", authenticateToken, (req, res) => {
     const userId = req.body.userId;
     const conversationId = req.body.conversationId;
     const message = req.body.message;
@@ -47,7 +47,7 @@ router.post("/sendmessage", (req, res) => {
     })
 })
 
-router.post("/adminsendmessage", (req, res) => {
+router.post("/adminsendmessage", authenticateAdminToken, (req, res) => {
     const userId = req.body.userId;
     const selectedUser = req.body.selectedUser;
     const message = req.body.message;
@@ -93,6 +93,8 @@ router.get("/getconversationid/:id", (req, res) => {
     })
 })
 
+
+//What the fuck is this even used for?
 router.get("/admingetconversationid/:userid", (req, res) => {
     const userId = req.params.userid;
 
@@ -108,6 +110,7 @@ router.get("/admingetconversationid/:userid", (req, res) => {
     })
 })
 
+
 router.get("/getconversationmessages/:conversationid", (req, res) => {
     const conversationId = req.params.conversationid;
     const query = "SELECT * FROM messages WHERE conversation_id = ?";
@@ -122,7 +125,7 @@ router.get("/getconversationmessages/:conversationid", (req, res) => {
     })
 })
 
-router.get("/admingetconversationmessages/:selecteduser", (req, res) => {
+router.get("/admingetconversationmessages/:selecteduser", authenticateAdminToken, (req, res) => {
     const selectedUser = req.params.selecteduser;
     let conversationId;
 
