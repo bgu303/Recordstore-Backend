@@ -5,8 +5,7 @@ const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
 //REMEMBER HERE! To go over the endpoints and add authentication layer as needed.
-
-router.get("/shoppingcartitems/:id", authenticateToken, (req, res) => {
+router.get("/shoppingcartitems/:id", (req, res) => {
     const userId = req.params.id;
     const query = `SELECT rec.* FROM shoppingcart JOIN rec ON shoppingcart.record_id = rec.id WHERE shoppingcart.user_id = ?`;
 
