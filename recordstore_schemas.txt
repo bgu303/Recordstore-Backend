@@ -77,4 +77,11 @@ CREATE TABLE order_items (
 	FOREIGN KEY (record_id) REFERENCES rec (id) ON DELETE CASCADE
 );
 
+CREATE TABLE feedback (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  user_email VARCHAR(255),
+  feedbackmessage VARCHAR(10000)
+);
+
 DROP TABLE shoppingcart;
