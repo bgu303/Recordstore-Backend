@@ -2,6 +2,20 @@ const express = require("express");
 const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
 const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
+const Joi = require('joi');
+
+const recordSchema = Joi.object({
+    artist: Joi.string().required(),
+    size: Joi.string().required(),
+    title: Joi.string().required(),
+    label: Joi.string(),
+    lev: Joi.string(),
+    kan: Joi.string().required(),
+    price: Joi.number().required().positive(),
+    genre: Joi.string().required(),
+    discogs: Joi.string(),
+    sold: Joi.boolean().default(false)
+});
 
 router.get("/", (req, res) => {
     const query = "SELECT * FROM rec";
@@ -53,6 +67,41 @@ router.post("/addnewrecord", authenticateAdminToken, (req, res) => {
         }
     })
 })
+
+router.post("/addrecords", (req, res) => {
+    const records = req.body.records;
+
+    // Validate each record against the schema
+    const { error } = Joi.array().items(recordSchema).validate(records);
+    if (error) {
+        console.log(error, " Invalid data format: ", error.details)
+        return res.status(400).json({ error: "Invalid data format", details: error.details });
+    }
+
+    const query = "INSERT INTO rec (artist, title, label, size, lev, kan, price, genre, discogs, sold) VALUES ?";
+    const values = records.map(record => [
+        record.artist,
+        record.title,
+        record.label,
+        record.size,
+        record.lev,
+        record.kan,
+        record.price,
+        record.genre,
+        record.discogs,
+        false // default value for sold
+    ]);
+
+    dbConnection.query(query, [values], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error: "Internal Server Error." });
+        }
+        if (results.affectedRows > 0) {
+            console.log("Records added successfully");
+            return res.status(201).json({ success: true, message: "New records added successfully." });
+        }
+    });
+});
 
 router.get("/updatesoldstatustosold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
