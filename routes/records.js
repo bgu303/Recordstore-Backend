@@ -68,7 +68,7 @@ router.post("/addnewrecord", authenticateAdminToken, (req, res) => {
     })
 })
 
-router.post("/addrecords", (req, res) => {
+router.post("/addrecords", authenticateAdminToken, (req, res) => {
     const records = req.body.records;
 
     // Validate each record against the schema
@@ -94,6 +94,7 @@ router.post("/addrecords", (req, res) => {
 
     dbConnection.query(query, [values], (error, results) => {
         if (error) {
+            console.log(error)
             return res.status(500).json({ error: "Internal Server Error." });
         }
         if (results.affectedRows > 0) {
