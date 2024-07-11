@@ -19,6 +19,7 @@ const shoppingcartRouter = require("./routes/shoppingcart")
 const chatRouter = require("./routes/chat")
 const orderRouter = require("./routes/orders")
 const feedbackRouter = require("./routes/feedback")
+const searchRouter = require ("./routes/search")
 
 app.use(cors());
 app.use(express.json());
@@ -29,6 +30,7 @@ app.use("/shoppingcart", shoppingcartRouter)
 app.use("/chat", chatRouter)
 app.use("/orders", orderRouter)
 app.use("/feedback", feedbackRouter)
+app.use("/search", searchRouter)
 
 io.on('connection', (socket) => {
   socket.on("joinRoom", (conversationId) => {

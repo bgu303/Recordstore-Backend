@@ -5,14 +5,14 @@ const { authenticateToken, authenticateAdminToken } = require("../middleware/aut
 const Joi = require('joi');
 
 const recordSchema = Joi.object({
-    artist: Joi.string().required(),
-    size: Joi.string().required(),
-    title: Joi.string().required(),
+    artist: Joi.string(),
+    size: Joi.string(),
+    title: Joi.string(),
     label: Joi.string(),
     lev: Joi.string(),
-    kan: Joi.string().required(),
-    price: Joi.number().required().positive(),
-    genre: Joi.string().required(),
+    kan: Joi.string(),
+    price: Joi.number().positive(),
+    genre: Joi.string(),
     discogs: Joi.string(),
     sold: Joi.boolean().default(false)
 });
