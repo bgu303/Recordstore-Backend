@@ -42,7 +42,7 @@ router.get("/getorderdatabyid/:id", (req, res) => {
     });
 })
 
-router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
+router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) => {
     const orderId = req.params.id;
     const getOrderItemsQuery = "SELECT record_id FROM order_items WHERE order_id = ?"
     const deleteOrderQuery = "DELETE FROM orders WHERE id = ?";
@@ -53,7 +53,7 @@ router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
     //Third, updates the status of sold items of the order back set to false, based on the fetched record ids in the first step.
     dbConnection.query(getOrderItemsQuery, [orderId], (error, results) => {
         const recordIds = results.map(row => row.record_id);
-        
+
         dbConnection.query(deleteOrderQuery, [orderId], (error, results) => {
             if (error) {
                 console.log(error);
@@ -64,7 +64,7 @@ router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
                 return res.status(404).json({ error: "No order deleted." });
             }
             console.log(`Order deleted with id: ${orderId}`);
-            
+
             dbConnection.query(updateOrderItemsQuery, [recordIds], (error, results) => {
                 if (error) {
                     console.log(error);
@@ -77,5 +77,26 @@ router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) =>{
         });
     });
 });
+
+router.get("/changeorderstatus/:id/:status", (req, res) => {
+    const orderId = req.params.id;
+    const orderStatus = req.params.status;
+    const query = "UPDATE orders SET order_status = ? WHERE id = ?";
+    const values = [orderStatus, orderId];
+
+    dbConnection.query(query, values, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error." });
+        }
+        if (results.affectedRows === 1) {
+            console.log("Order status updated correctly.");
+            return res.status(201).json({ success: true, message: "Order status updated correctly." });
+        } else {
+            return res.status(404).json({ error: "Order not found." });
+        }
+    });
+});
+
 
 module.exports = router;
