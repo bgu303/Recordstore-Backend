@@ -6,7 +6,6 @@ const { authenticateToken, authenticateAdminToken } = require("../middleware/aut
 router.get('/:searchterm', (req, res) => {
     const searchTerm = req.params.searchterm;
     const searchValue = `%${searchTerm}%`;
-    console.log(searchValue);
     const query = `
       SELECT * FROM rec 
       WHERE 
