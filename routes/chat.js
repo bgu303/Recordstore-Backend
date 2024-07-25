@@ -93,7 +93,6 @@ router.get("/getconversationid/:id", (req, res) => {
     })
 })
 
-
 //What the fuck is this even used for?
 router.get("/admingetconversationid/:userid", (req, res) => {
     const userId = req.params.userid;
@@ -109,7 +108,6 @@ router.get("/admingetconversationid/:userid", (req, res) => {
         }
     })
 })
-
 
 router.get("/getconversationmessages/:conversationid", (req, res) => {
     const conversationId = req.params.conversationid;
@@ -129,26 +127,39 @@ router.get("/admingetconversationmessages/:selecteduser", authenticateAdminToken
     const selectedUser = req.params.selecteduser;
     let conversationId;
 
-    const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)"; //Fix
+    const searchConversationIdQuery = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)";
 
-    dbConnection.query(searchConversationIdQuery, [selectedUser, adminId, selectedUser, adminId], (error, results) => {
+    dbConnection.query(searchConversationIdQuery, [selectedUser, adminId, adminId, selectedUser], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).json({ error: "Internal Server Error" });
         } else {
+            if (results.length === 0) {
+                return res.status(404).json({ error: "Conversation not found" });
+            }
+
             conversationId = results[0].id;
-            const query = "SELECT * FROM messages WHERE conversation_id = ?";
-            dbConnection.query(query, [conversationId], (error, results) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(500).json({ error: "Internal Server Error " });
-                } else {
-                    res.json(results);
+
+            const updateQuery = "UPDATE messages SET isread_admin = true WHERE conversation_id = ?";
+            dbConnection.query(updateQuery, [conversationId], (updateError) => {
+                if (updateError) {
+                    console.log(updateError);
+                    return res.status(500).json({ error: "Internal Server Error" });
                 }
-            })
+
+                const selectQuery = "SELECT * FROM messages WHERE conversation_id = ?";
+                dbConnection.query(selectQuery, [conversationId], (selectError, results) => {
+                    if (selectError) {
+                        console.log(selectError);
+                        return res.status(500).json({ error: "Internal Server Error" });
+                    } else {
+                        res.json(results);
+                    }
+                });
+            });
         }
-    })
-})
+    });
+});
 
 router.get("/getallconversationmessages", (req, res) => {
     const query = "SELECT * FROM messages";
@@ -172,6 +183,21 @@ router.get("/getallconversationids", (req, res) => {
             return res.status(500).json({ error: "Internal Server Error" });
         } else {
             res.json(results);
+        }
+    })
+})
+
+router.get("/chatmessagechecker/:conversationid", (req, res) => {
+    const conversationId = req.params.conversationid;
+    const query = "UPDATE messages SET isread = true WHERE conversation_id = ?";
+    
+    dbConnection.query(query, [conversationId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        } else {
+            console.log("Message statuses updated successfully.");
+            return res.status(201).json({ success: true, message: "Message statuses updated successfully." })
         }
     })
 })

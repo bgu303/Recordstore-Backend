@@ -74,6 +74,25 @@ router.post("/addtocart", (req, res) => {
     })
 })
 
+router.delete("/shoppingcarttimerdelete", (req, res) => {
+    const currentTime = new Date();
+    const sixHoursAgo = new Date(currentTime.getTime() - 6 * 60 * 60 * 1000);
+    const query = "DELETE FROM shoppingcart WHERE added_at < ?";
+
+    dbConnection.query(query, [sixHoursAgo], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error. " });
+        }
+        if (results.affectedRows === 0) {
+            console.log("Nothing deleted");
+            return res.status(200).json({ success: `Nothing to be deleted. Current time: ${currentTime}` });
+        }
+        res.json({ success: true, message: "Shoppingcart items deleted successfully." });
+        console.log("Shoppingcart items deleted successfully.");
+    })
+})
+
 router.post("/sendcart2", (req, res) => {
     const sgMail = require('@sendgrid/mail');
     sgMail.setApiKey(SENDGRID_API_KEY);

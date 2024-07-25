@@ -25,14 +25,7 @@ CREATE TABLE recordstoreusers (
 CREATE TABLE shoppingcart (
   user_id INT,
   record_id INT,
-  PRIMARY KEY (user_id, record_id),
-  FOREIGN KEY (user_id) REFERENCES recordstoreusers (id),
-  FOREIGN KEY (record_id) REFERENCES rec (id)
-);
-
-CREATE TABLE shoppingcart (
-  user_id INT,
-  record_id INT,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (record_id),
   FOREIGN KEY (user_id) REFERENCES recordstoreusers (id) ON DELETE CASCADE,
   FOREIGN KEY (record_id) REFERENCES rec (id) ON DELETE CASCADE
@@ -53,6 +46,8 @@ CREATE TABLE messages (
     sender_id INT NOT NULL,
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    isread BOOLEAN DEFAULT FALSE,
+    isread_admin BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id),
     FOREIGN KEY (sender_id) REFERENCES recordstoreusers(id)
 );
