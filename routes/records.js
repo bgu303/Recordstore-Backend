@@ -6,9 +6,9 @@ const Joi = require('joi');
 
 const recordSchema = Joi.object({
     artist: Joi.string(),
-    size: Joi.string(),
     title: Joi.string(),
     label: Joi.string(),
+    size: Joi.string(),
     lev: Joi.string(),
     kan: Joi.string(),
     price: Joi.number().positive(),
