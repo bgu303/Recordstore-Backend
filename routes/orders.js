@@ -4,7 +4,6 @@ const dbConnection = require("../databaseconnection/databaseconnection");
 const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
 router.get("/getorderdata", authenticateAdminToken, (req, res) => {
-
     //GPT-magic. :) The query returns all of the order items with the order details aswell. So, grouping is needed on front-end side to only show customer data once, then item data.
     const query = `SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price
     FROM orders o
@@ -97,6 +96,19 @@ router.get("/changeorderstatus/:id/:status", (req, res) => {
         }
     });
 });
+
+router.get("/getallorders", authenticateAdminToken, (req, res) => {
+    const query = "SELECT * FROM orders";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(501).json({ error: "Internal Server Error." });
+        } else {
+            res.json(results);
+        }
+    })
+})
 
 
 module.exports = router;

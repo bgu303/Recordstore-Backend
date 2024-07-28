@@ -22,6 +22,7 @@ const orderRouter = require("./routes/orders")
 const feedbackRouter = require("./routes/feedback")
 const searchRouter = require("./routes/search")
 const notificationsRouter = require("./routes/notifications")
+const playlistRouter = require("./routes/playlists")
 
 app.use(cors());
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use("/orders", orderRouter)
 app.use("/feedback", feedbackRouter)
 app.use("/search", searchRouter)
 app.use("/notifications", notificationsRouter)
+app.use("/playlists", playlistRouter)
 
 io.on('connection', (socket) => {
   socket.on("joinRoom", (conversationId) => {
