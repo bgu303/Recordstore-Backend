@@ -37,7 +37,6 @@ router.delete("/playlistdelete/:id", authenticateAdminToken, (req, res) => {
     const playlistId = req.params.id;
     const query = "DELETE FROM playlists WHERE id = ?";
 
-
     dbConnection.query(query, [playlistId], (error, results) => {
         if (error) {
             console.log(error);

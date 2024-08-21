@@ -5,7 +5,7 @@ const { authenticateToken, authenticateAdminToken } = require("../middleware/aut
 
 router.get("/getorderdata", authenticateAdminToken, (req, res) => {
     //GPT-magic. :) The query returns all of the order items with the order details aswell. So, grouping is needed on front-end side to only show customer data once, then item data.
-    const query = `SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price
+    const query = `SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price, r.label
     FROM orders o
     INNER JOIN order_items oi ON o.id = oi.order_id
     INNER JOIN rec r ON oi.record_id = r.id;
@@ -109,6 +109,5 @@ router.get("/getallorders", authenticateAdminToken, (req, res) => {
         }
     })
 })
-
 
 module.exports = router;
