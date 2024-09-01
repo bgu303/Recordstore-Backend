@@ -5,17 +5,19 @@ const { authenticateToken, authenticateAdminToken } = require("../middleware/aut
 const Joi = require('joi');
 
 const recordSchema = Joi.object({
-    artist: Joi.string(),
-    size: Joi.string(),
-    title: Joi.string(),
-    label: Joi.string(),
-    lev: Joi.string(),
-    kan: Joi.string(),
-    price: Joi.number().positive(),
-    genre: Joi.string(),
-    discogs: Joi.string(),
+    artist: Joi.string().allow(null, ""),
+    size: Joi.string().allow(null, ""),
+    title: Joi.string().allow(null, ""),
+    label: Joi.string().allow(null, ""),
+    year: Joi.number().allow(null),
+    lev: Joi.string().allow(null, ""),
+    kan: Joi.string().allow(null, ""),
+    genre: Joi.string().allow(null, ""),
+    price: Joi.number().positive().allow(null),
+    discogs: Joi.string().allow(null, ""),
     sold: Joi.boolean().default(false)
 });
+
 
 router.get("/", (req, res) => {
     const query = "SELECT * FROM rec";
@@ -78,16 +80,17 @@ router.post("/addrecords", authenticateAdminToken, (req, res) => {
         return res.status(400).json({ error: "Invalid data format", details: error.details });
     }
 
-    const query = "INSERT INTO rec (artist, title, label, size, lev, kan, price, genre, discogs, sold) VALUES ?";
+    const query = "INSERT INTO rec (artist, title, label, year, size, lev, kan, genre, price, discogs, sold) VALUES ?";
     const values = records.map(record => [
         record.artist,
         record.title,
         record.label,
+        record.year,
         record.size,
         record.lev,
         record.kan,
-        record.price,
         record.genre,
+        record.price,
         record.discogs,
         false // default value for sold
     ]);

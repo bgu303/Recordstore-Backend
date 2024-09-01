@@ -4,6 +4,25 @@ const dbConnection = require("../databaseconnection/databaseconnection");
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
+function generateOrderId() {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    
+    // Generate 3 random uppercase letters
+    let randomLetters = "";
+    for (let i = 0; i < 3; i++) {
+        randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    
+    // Generate a random 3-digit number
+    let randomNumbers = "";
+    for (let i = 0; i < 3; i++) {
+        randomNumbers += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    
+    return `${randomLetters}-${randomNumbers}`;
+}
+
 //REMEMBER HERE! To go over the endpoints and add authentication layer as needed.
 router.get("/shoppingcartitems/:id", (req, res) => {
     const userId = req.params.id;
@@ -153,12 +172,13 @@ router.post("/sendcart", (req, res) => {
     const { customerInfo, userId, shoppingcart } = req.body;
     console.log(shoppingcart)
     let orderId = "";
+    const orderCode = generateOrderId();
 
-    const orderQuery = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, customer_paymentoption, customer_shippingoption, customer_address, order_date) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+    const orderQuery = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, customer_paymentoption, customer_shippingoption, customer_address, order_date, order_code) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
     const orderItemsQuery = "INSERT INTO order_items (order_id, record_id) VALUES (?, ?)";
     const soldQuery = "UPDATE rec SET sold = true WHERE id = ?";
 
-    dbConnection.query(orderQuery, [userId, customerInfo.name, customerInfo.phoneNumber, customerInfo.email, customerInfo.paymentOption, customerInfo.shippingOption, customerInfo.address], (error, results) => {
+    dbConnection.query(orderQuery, [userId, customerInfo.name, customerInfo.phoneNumber, customerInfo.email, customerInfo.paymentOption, customerInfo.shippingOption, customerInfo.address, orderCode], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(501).json({ error: "Internal Server Error." });

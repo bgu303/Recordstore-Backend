@@ -9,6 +9,7 @@ CREATE TABLE rec (
     price DOUBLE,
     discogs VARCHAR(255),
     genre VARCHAR(255),
+    year INT,
     sold BOOLEAN DEFAULT false,
     PRIMARY key (id)
 );
@@ -55,6 +56,7 @@ CREATE TABLE messages (
 CREATE TABLE orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
+  order_code VARCHAR(10),
   customer_name VARCHAR(255),
   customer_phone VARCHAR(255),
   customer_email VARCHAR(255),
