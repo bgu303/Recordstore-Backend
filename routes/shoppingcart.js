@@ -209,7 +209,7 @@ router.post("/sendcart", (req, res) => {
                 }
             })
         })
-        return res.status(201).json({ success: true, message: "New order item added successfully.", orderId: orderId });
+        return res.status(201).json({ success: true, message: "New order added successfully.", orderId: orderId, orderCode: orderCode });
     })
 })
 

@@ -83,7 +83,8 @@ CREATE TABLE feedback (
 
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    notification_text TEXT NOT NULL
+    notification_text TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE playlists (
