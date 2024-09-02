@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 router.use(express.json());
 
 let adminId;
+let systemId;
 
 const fetchAdminId = () => {
     const query = "SELECT id FROM recordstoreusers WHERE user_role = 'ADMIN'";
@@ -24,7 +25,25 @@ const fetchAdminId = () => {
     })
 }
 
+const fetchSystemId = () => {
+    const query = "SELECT id FROM recordstoreusers WHERE email = 'Järjestelmä'";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log("Failed to fetch System ID: " + error);
+            return;
+        }
+        if (results.length > 0) {
+            systemId = results[0].id;
+            console.log("System ID fetched successfully: " + systemId);
+        } else {
+            console.log("System ID not found.");
+        }
+    })
+}
+
 fetchAdminId();
+fetchSystemId();
 
 router.post("/createuser", async (req, res) => {
     const { email, password, role } = req.body;

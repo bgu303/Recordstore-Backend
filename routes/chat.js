@@ -4,6 +4,7 @@ const dbConnection = require("../databaseconnection/databaseconnection");
 const { authenticateToken, authenticateAdminToken } = require("../middleware/authMiddleware");
 
 let adminId;
+let systemId;
 
 //Fetch admin ID from database upon server startup.
 //Admin ID later used in other chat related endpoints.
@@ -25,15 +26,32 @@ const fetchAdminId = () => {
     })
 }
 
-//Call fetchAdminId function when the server starts.
+const fetchSystemId = () => {
+    const query = "SELECT id FROM recordstoreusers WHERE email = 'Järjestelmä'";
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log("Failed to fetch System ID: " + error);
+            return;
+        }
+        if (results.length > 0) {
+            systemId = results[0].id;
+            console.log("System ID fetched successfully: " + systemId);
+        } else {
+            console.log("System ID not found.");
+        }
+    })
+}
+
 fetchAdminId();
+fetchSystemId();
 
 router.post("/sendmessage", authenticateToken, (req, res) => {
     const userId = req.body.userId;
     const conversationId = req.body.conversationId;
     const message = req.body.message;
 
-    const query = "INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)";
+    const query = "INSERT INTO messages (conversation_id, sender_id, message, isread) VALUES (?, ?, ?, true)";
 
     dbConnection.query(query, [conversationId, userId, message], (error, results) => {
         if (error) {
@@ -62,7 +80,7 @@ router.post("/adminsendmessage", authenticateAdminToken, (req, res) => {
         }
         else {
             conversationId = results[0].id;
-            const query = "INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)";
+            const query = "INSERT INTO messages (conversation_id, sender_id, message, isread_admin) VALUES (?, ?, ?, true)";
 
             dbConnection.query(query, [conversationId, userId, message], (error, results) => {
                 if (error) {
@@ -78,15 +96,34 @@ router.post("/adminsendmessage", authenticateAdminToken, (req, res) => {
     })
 })
 
+router.post("/sendautomatedmessage", authenticateToken, (req, res) => {
+    const conversationId = req.body.conversationId;
+    const message = req.body.message;
+    console.log(message);
+
+    const query = "INSERT INTO messages (conversation_id, sender_id, message, isread, isread_admin) VALUES (?, ?, ?, true, true)";
+
+    dbConnection.query(query, [conversationId, systemId, message], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (results.affectedRows === 1) {
+            console.log("Message Sent successfully");
+            return res.status(201).json({ success: true, message: "Message sent successfully." })
+        }
+    })
+})
+
 router.get("/getconversationid/:id", (req, res) => {
     const userId = req.params.id;
-   
+
     const query = "SELECT id FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
 
     dbConnection.query(query, [userId, adminId], (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ error: "Internal Server Error"});
+            return res.status(500).json({ error: "Internal Server Error" });
         } else {
             res.json(results);
         }
@@ -102,7 +139,7 @@ router.get("/admingetconversationid/:userid", (req, res) => {
     dbConnection.query(query, [userId, adminId], (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ error: "Internal Server Error"} );
+            return res.status(500).json({ error: "Internal Server Error" });
         } else {
             res.json(results);
         }
@@ -190,7 +227,7 @@ router.get("/getallconversationids", (req, res) => {
 router.get("/chatmessagechecker/:conversationid", (req, res) => {
     const conversationId = req.params.conversationid;
     const query = "UPDATE messages SET isread = true WHERE conversation_id = ?";
-    
+
     dbConnection.query(query, [conversationId], (error, results) => {
         if (error) {
             console.log(error);
