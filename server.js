@@ -63,7 +63,7 @@ server.listen(port, () => {
 
   setInterval(async () => {
     try {
-      const response = await axios.delete(`http://localhost:3001/shoppingcart/shoppingcarttimerdelete`);
+      const response = await axios.delete(`https://recordstore-front-v2.vercel.app/shoppingcart/shoppingcarttimerdelete`);
       console.log(response.data);
     } catch (error) {
       console.error(error.message);

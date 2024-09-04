@@ -53,7 +53,7 @@ router.post("/createuser", async (req, res) => {
     const createConvoQuery = "INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)";
     const values = [email, hashedPassword, role];
     let createdUserId;
-    let adminId = 14;
+    let adminId = fetchAdminId();
 
     dbConnection.query(query, values, (error, results) => {
         if (error) {
