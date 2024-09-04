@@ -33,7 +33,7 @@ router.get("/", (req, res) => {
 
 //Used to test cloud implementation, delete later.
 router.get("/test", (req, res) => {
-    res.send("Test working PLS FOR THE LOVE OF JESUS CHRIST ALL MIGHTY! LAST TIME U DIDNT HELP US U BITCH");
+    res.send("Test working2");
 })
 
 router.delete("/:id", authenticateAdminToken, (req, res) => {

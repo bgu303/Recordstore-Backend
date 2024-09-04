@@ -53,12 +53,12 @@ router.post("/createuser", async (req, res) => {
     const createConvoQuery = "INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)";
     const values = [email, hashedPassword, role];
     let createdUserId;
-    let adminId = fetchAdminId();
+    let adminId = 57;
 
     dbConnection.query(query, values, (error, results) => {
         if (error) {
             if (error.errno === 1062) {
-                return res.status(501).json({ error: "Internal Server Error." });
+                return res.status(409).json({ error: "Email already in use." });
             } else {
                 console.log(error);
                 return res.status(500).json({ error: "Internal Server Error." });
@@ -69,7 +69,7 @@ router.post("/createuser", async (req, res) => {
             dbConnection.query(createConvoQuery, [createdUserId, adminId], (error, results) => {
                 if (error) {
                     console.log(error);
-                    return res.status(501).json({ error: "Internal Server Error" });
+                    return res.status(500).json({ error: "Internal Server Error" });
                 } else {
                     console.log("User created successfully.");
                     return res.status(201).json({ success: true, message: "User created successfully" });
@@ -80,6 +80,7 @@ router.post("/createuser", async (req, res) => {
         }
     })
 })
+
 
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
