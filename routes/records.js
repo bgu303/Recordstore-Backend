@@ -24,7 +24,9 @@ router.get("/", (req, res) => {
     dbConnection.query(query, (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(500).json({ error: "Internal Server Error", details: error });
+            console.error('Database query error:', error.message);
+            console.error('Error stack trace:', error.stack);
+            return res.status(500).json({ error: `Error message: ${error.message} and Error stack: ${error.stack}` });
         } else {
             res.json(results);
         }
