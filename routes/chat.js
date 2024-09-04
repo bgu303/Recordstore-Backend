@@ -99,7 +99,6 @@ router.post("/adminsendmessage", authenticateAdminToken, (req, res) => {
 router.post("/sendautomatedmessage", authenticateToken, (req, res) => {
     const conversationId = req.body.conversationId;
     const message = req.body.message;
-    console.log(message);
 
     const query = "INSERT INTO messages (conversation_id, sender_id, message, isread, isread_admin) VALUES (?, ?, ?, true, true)";
 

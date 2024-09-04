@@ -37,8 +37,8 @@ CREATE TABLE conversations (
     user1_id INT NOT NULL,
     user2_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user1_id) REFERENCES recordstoreusers(id),
-    FOREIGN KEY (user2_id) REFERENCES recordstoreusers(id)
+    FOREIGN KEY (user1_id) REFERENCES recordstoreusers(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES recordstoreusers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE messages (
@@ -49,8 +49,8 @@ CREATE TABLE messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     isread BOOLEAN DEFAULT FALSE,
     isread_admin BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (conversation_id) REFERENCES conversations(id),
-    FOREIGN KEY (sender_id) REFERENCES recordstoreusers(id)
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES recordstoreusers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE orders (

@@ -7,10 +7,18 @@ const http = require("http");
 const socketIo = require("socket.io");
 const port = process.env.PORT || 3001
 const server = http.createServer(app);
+
+const corsOptions = {
+  origin: "https://recordstore-front-v2.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 const io = socketIo(server, {
   cors: {
-    origin: "*", // Allow requests from all origins, REMEMBER TO CHANGE LATER!
-    methods: ["GET", "POST"] // Allow only specified methods
+    origin: "https://recordstore-front-v2.vercel.app",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Authorization"],
   }
 });
 
@@ -24,7 +32,7 @@ const searchRouter = require("./routes/search")
 const notificationsRouter = require("./routes/notifications")
 const playlistRouter = require("./routes/playlists")
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/records", recordsRouter)
