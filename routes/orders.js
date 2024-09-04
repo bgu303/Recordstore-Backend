@@ -25,7 +25,7 @@ router.get("/getorderdatabyid/:id", (req, res) => {
     const userId = req.params.id
 
     const query = `
-        SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price
+        SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price, r.label
         FROM orders o
         INNER JOIN order_items oi ON o.id = oi.order_id
         INNER JOIN rec r ON oi.record_id = r.id
