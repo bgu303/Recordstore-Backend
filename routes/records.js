@@ -18,7 +18,6 @@ const recordSchema = Joi.object({
     sold: Joi.boolean().default(false)
 });
 
-
 router.get("/", (req, res) => {
     const query = "SELECT * FROM rec";
 
@@ -34,7 +33,7 @@ router.get("/", (req, res) => {
 
 //Used to test cloud implementation, delete later.
 router.get("/test", (req, res) => {
-    res.send("Test working PLS FOR THE LOVE OF JESUS CHRIST ALL MIGHTY");
+    res.send("Test working PLS FOR THE LOVE OF JESUS CHRIST ALL MIGHTY! LAST TIME U DIDNT HELP US U BITCH");
 })
 
 router.delete("/:id", authenticateAdminToken, (req, res) => {
