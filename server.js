@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server running on port ${port}`)
+  console.log(`Server running on port ${port}`);
 
   setInterval(async () => {
     try {
@@ -68,5 +68,5 @@ server.listen(port, () => {
     } catch (error) {
       console.error(error.message);
     }
-  }, 3600000);
-})
+  }, 86400000);
+});
