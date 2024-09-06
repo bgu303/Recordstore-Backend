@@ -9,18 +9,25 @@ const port = process.env.PORT || 3001
 const server = http.createServer(app);
 
 const corsOptions = {
-  origin: "https://recordstore-front-v2.vercel.app",
+  origin: [
+    "https://recordstore-front-v2.vercel.app",
+    "https://www.poppimikko.com"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://recordstore-front-v2.vercel.app",
+    origin: [
+      "https://recordstore-front-v2.vercel.app",
+      "https://www.poppimikko.com"
+    ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Authorization"],
   }
 });
+
 
 const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")
