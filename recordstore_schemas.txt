@@ -10,6 +10,7 @@ CREATE TABLE rec (
     discogs VARCHAR(255),
     genre VARCHAR(255),
     year INT,
+    shelf_space VARCHAR(255),
     sold BOOLEAN DEFAULT false,
     PRIMARY key (id)
 );

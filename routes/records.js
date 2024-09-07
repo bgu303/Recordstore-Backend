@@ -15,6 +15,7 @@ const recordSchema = Joi.object({
     genre: Joi.string().allow(null, ""),
     price: Joi.number().positive().allow(null),
     discogs: Joi.string().allow(null, ""),
+    shelf_space: Joi.string().allow(null, ""),
     sold: Joi.boolean().default(false)
 });
 
@@ -79,7 +80,7 @@ router.post("/addrecords", authenticateAdminToken, (req, res) => {
         return res.status(400).json({ error: "Invalid data format", details: error.details });
     }
 
-    const query = "INSERT INTO rec (artist, title, label, year, size, lev, kan, genre, price, discogs, sold) VALUES ?";
+    const query = "INSERT INTO rec (artist, title, label, year, size, lev, kan, genre, price, discogs, shelf_space, sold) VALUES ?";
     const values = records.map(record => [
         record.artist,
         record.title,
@@ -91,6 +92,7 @@ router.post("/addrecords", authenticateAdminToken, (req, res) => {
         record.genre,
         record.price,
         record.discogs,
+        record.shelf_space,
         false // default value for sold
     ]);
 
@@ -105,6 +107,55 @@ router.post("/addrecords", authenticateAdminToken, (req, res) => {
         }
     });
 });
+
+router.put("/editrecord", authenticateAdminToken, (req, res) => {
+    const record = req.body.record;
+
+    const query = `
+        UPDATE rec 
+        SET artist = ?, 
+            title = ?, 
+            label = ?, 
+            year = ?, 
+            size = ?, 
+            lev = ?, 
+            kan = ?, 
+            genre = ?, 
+            price = ?, 
+            discogs = ?, 
+            shelf_space = ?
+        WHERE id = ?
+    `;
+
+    const values = [
+        record.artist,
+        record.title,
+        record.label,
+        record.year,
+        record.size,
+        record.lev,
+        record.kan,
+        record.genre,
+        record.price,
+        record.discogs,
+        record.shelf_space,
+        record.id
+    ];
+
+    dbConnection.query(query, values, (error, results) => {
+        if (error) {
+            console.log("Error updating record: ", error);
+            return res.status(500).json({ error: "Internal Server Error." });
+        }
+
+        if (results.affectedRows > 0) {
+            console.log("Record updated successfully");
+            return res.status(200).json({ success: true, message: "Record updated successfully." });
+        } else {
+            return res.status(404).json({ error: "Record not found." });
+        }
+    });
+})
 
 router.get("/updatesoldstatustosold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
