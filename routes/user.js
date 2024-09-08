@@ -188,16 +188,22 @@ router.post("/deleteuser", async (req, res) => {
 });
 
 router.get("/getallusers", (req, res) => {
-    const query = "SELECT * FROM recordstoreusers";
+    const query = `
+        SELECT recordstoreusers.*, MAX(messages.created_at) AS last_message_time
+        FROM recordstoreusers
+        LEFT JOIN messages ON recordstoreusers.id = messages.sender_id
+        GROUP BY recordstoreusers.id
+        ORDER BY last_message_time DESC;
+    `;
 
     dbConnection.query(query, (error, results) => {
         if (error) {
             console.log(error);
-            return res.json(501).json({ error: "Internal Server Error " });
+            return res.status(501).json({ error: "Internal Server Error" });
         } else {
             res.json(results);
         }
-    })
-})
+    });
+});
 
 module.exports = router;
