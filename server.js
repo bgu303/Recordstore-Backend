@@ -11,7 +11,9 @@ const server = http.createServer(app);
 const corsOptions = {
   origin: [
     "https://recordstore-front-v2.vercel.app",
-    "https://www.poppimikko.com"
+    "https://www.poppimikko.com",
+    "http://localhost:3000"
+
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -21,13 +23,13 @@ const io = socketIo(server, {
   cors: {
     origin: [
       "https://recordstore-front-v2.vercel.app",
-      "https://www.poppimikko.com"
+      "https://www.poppimikko.com",
+      "http://localhost:3000"
     ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Authorization"],
   }
 });
-
 
 const recordsRouter = require("./routes/records")
 const userRouter = require("./routes/user")

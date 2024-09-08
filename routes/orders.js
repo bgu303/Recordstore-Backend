@@ -110,4 +110,32 @@ router.get("/getallorders", authenticateAdminToken, (req, res) => {
     })
 })
 
+router.delete("/deletefromorder/:orderId/:recordId", authenticateAdminToken, (req, res) => {
+    const { orderId, recordId } = req.params;
+
+    const deleteOrderItemQuery = "DELETE FROM order_items WHERE order_id = ? AND record_id = ?";
+    const updateStatusQuery = "UPDATE rec SET sold = false WHERE id = ?";
+
+    dbConnection.query(deleteOrderItemQuery, [orderId, recordId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error." });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Order item not found." });
+        }
+
+        dbConnection.query(updateStatusQuery, [recordId], (error, results) => {
+            if (error) {
+                console.log(error);
+                return res.status(500).json({ error: "Failed to update record status." });
+            }
+
+            res.json({ success: true, message: "Order item deleted and record status updated successfully." });
+            console.log("Order item deleted and record sold status updated to false.");
+        });
+    });
+});
+
+
 module.exports = router;
