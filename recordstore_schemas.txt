@@ -20,6 +20,7 @@ CREATE TABLE recordstoreusers (
   email VARCHAR(100) NOT NULL,
   user_password VARCHAR(255) NOT NULL,
   user_role VARCHAR(50) NOT NULL,
+  can_order BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (email),
   UNIQUE (id)
 );

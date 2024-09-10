@@ -3,6 +3,7 @@ const router = express.Router();
 const dbConnection = require("../databaseconnection/databaseconnection");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const { authenticateAdminToken } = require("../middleware/authMiddleware");
 router.use(express.json());
 
 let adminId;
@@ -81,7 +82,6 @@ router.post("/createuser", async (req, res) => {
     })
 })
 
-
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const query = "SELECT * FROM recordstoreusers WHERE email = ?";
@@ -103,7 +103,7 @@ router.post("/login", async (req, res) => {
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
-        const token = jwt.sign({ userId: user.id, email: user.email, userRole: user.user_role }, 'your-secret-key', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id, email: user.email, userRole: user.user_role }, 'your-secret-key', { expiresIn: '24h' });
         console.log(`Logging in with token: ${token}`);
         res.status(200).json({ success: true, token });
     })
@@ -203,6 +203,110 @@ router.get("/getallusers", (req, res) => {
         } else {
             res.json(results);
         }
+    });
+});
+
+router.put("/toggleorderingaccess", authenticateAdminToken, (req, res) => {
+    const userId = req.body.userId;
+    const getStatusQuery = "SELECT can_order FROM recordstoreusers WHERE id = ?";
+    
+    dbConnection.query(getStatusQuery, [userId], (error, results) => {
+        if (error) {
+            console.log("Error fetching user status: ", error);
+            return res.status(500).json({ error: "Internal Server Error." });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        const currentStatus = results[0].can_order;
+        const newStatus = !currentStatus;
+
+        const updateQuery = "UPDATE recordstoreusers SET can_order = ? WHERE id = ?";
+        
+        dbConnection.query(updateQuery, [newStatus, userId], (updateError, updateResults) => {
+            if (updateError) {
+                console.log("Error updating access status: ", updateError);
+                return res.status(500).json({ error: "Internal Server Error." });
+            }
+
+            if (updateResults.affectedRows > 0) {
+                const action = newStatus ? "granted" : "revoked";
+                console.log(`Ordering access status ${action} successfully.`);
+                return res.status(200).json({ success: true, message: `Ordering access status ${action} successfully.` });
+            } else {
+                return res.status(404).json({ error: "Something went wrong." });
+            }
+        });
+    });
+});
+
+//This follows the same kind of logic as the user who themselves want to delete their user. The database tables have on cascade deleting for the convo and the messages, idk why I need to do it "manually" ....
+router.delete("/deleteuseradmin", async (req, res) => {
+    const { userId } = req.body;
+    const userQuery = "SELECT * FROM recordstoreusers WHERE id = ?";
+
+    dbConnection.query(userQuery, [userId], (error, results) => {
+        if (error) {
+            console.log(`Error fetching user: ${error}`);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const conversationQuery = "SELECT * FROM conversations WHERE (user1_id = ? AND user2_id = ?)";
+        dbConnection.query(conversationQuery, [userId, adminId], (conversationError, conversationResults) => {
+            if (conversationError) {
+                console.log(`Error fetching conversations: ${conversationError}`);
+                return res.status(500).json({ error: "Internal Server Error" });
+            }
+
+            if (conversationResults.length > 0) {
+                const conversationIds = conversationResults.map(conversation => conversation.id);
+                const deleteMessagesQuery = "DELETE FROM messages WHERE conversation_id IN (?)";
+                dbConnection.query(deleteMessagesQuery, [conversationIds], (messageError, messageResults) => {
+                    if (messageError) {
+                        console.log(`Error deleting messages: ${messageError}`);
+                        return res.status(500).json({ error: "Internal Server Error" });
+                    }
+
+                    // Delete the conversations
+                    const deleteConversationsQuery = "DELETE FROM conversations WHERE id IN (?)";
+                    dbConnection.query(deleteConversationsQuery, [conversationIds], (conversationDeleteError, conversationDeleteResults) => {
+                        if (conversationDeleteError) {
+                            console.log(`Error deleting conversations: ${conversationDeleteError}`);
+                            return res.status(500).json({ error: "Internal Server Error" });
+                        }
+
+                        const deleteUserQuery = "DELETE FROM recordstoreusers WHERE id = ?";
+                        dbConnection.query(deleteUserQuery, [userId], (deleteUserError, deleteUserResults) => {
+                            if (deleteUserError) {
+                                console.log(`Error deleting user: ${deleteUserError}`);
+                                return res.status(500).json({ error: "Internal Server Error" });
+                            }
+
+                            console.log("User and related data deleted successfully.");
+                            return res.status(200).json({ message: "User and related data deleted successfully" });
+                        });
+                    });
+                });
+            } else {
+                // If no conversations, just delete the user
+                const deleteUserQuery = "DELETE FROM recordstoreusers WHERE id = ?";
+                dbConnection.query(deleteUserQuery, [userId], (deleteUserError, deleteUserResults) => {
+                    if (deleteUserError) {
+                        console.log(`Error deleting user: ${deleteUserError}`);
+                        return res.status(500).json({ error: "Internal Server Error" });
+                    }
+
+                    console.log("User deleted successfully.");
+                    return res.status(200).json({ message: "User deleted successfully" });
+                });
+            }
+        });
     });
 });
 
