@@ -243,7 +243,7 @@ router.put("/toggleorderingaccess", authenticateAdminToken, (req, res) => {
 });
 
 //This follows the same kind of logic as the user who themselves want to delete their user. The database tables have on cascade deleting for the convo and the messages, idk why I need to do it "manually" ....
-router.delete("/deleteuseradmin", async (req, res) => {
+router.delete("/deleteuseradmin", authenticateAdminToken, async (req, res) => {
     const { userId } = req.body;
     const userQuery = "SELECT * FROM recordstoreusers WHERE id = ?";
 
