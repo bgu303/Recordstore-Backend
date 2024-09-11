@@ -47,12 +47,15 @@ fetchAdminId();
 fetchSystemId();
 
 router.post("/createuser", async (req, res) => {
-    const { email, password, role } = req.body;
+    let { email, password, name, nickName, role } = req.body;
+
+    // Capitalize the first letter of each part of the name
+    name = name.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = "INSERT INTO recordstoreusers (email, user_password, user_role) VALUES (?, ?, ?)";
+    const query = "INSERT INTO recordstoreusers (email, user_password, user_name, user_nickname, user_role) VALUES (?, ?, ?, ?, ?)";
     const createConvoQuery = "INSERT INTO conversations (user1_id, user2_id) VALUES (?, ?)";
-    const values = [email, hashedPassword, role];
+    const values = [email, hashedPassword, name, nickName, role];
     let createdUserId;
     let adminId = 57;
 
@@ -80,7 +83,7 @@ router.post("/createuser", async (req, res) => {
             return res.status(500).json({ error: "Failed to create user" });
         }
     })
-})
+});
 
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -209,7 +212,7 @@ router.get("/getallusers", (req, res) => {
 router.put("/toggleorderingaccess", authenticateAdminToken, (req, res) => {
     const userId = req.body.userId;
     const getStatusQuery = "SELECT can_order FROM recordstoreusers WHERE id = ?";
-    
+
     dbConnection.query(getStatusQuery, [userId], (error, results) => {
         if (error) {
             console.log("Error fetching user status: ", error);
@@ -224,7 +227,7 @@ router.put("/toggleorderingaccess", authenticateAdminToken, (req, res) => {
         const newStatus = !currentStatus;
 
         const updateQuery = "UPDATE recordstoreusers SET can_order = ? WHERE id = ?";
-        
+
         dbConnection.query(updateQuery, [newStatus, userId], (updateError, updateResults) => {
             if (updateError) {
                 console.log("Error updating access status: ", updateError);
