@@ -82,6 +82,15 @@ io.on('connection', (socket) => {
       created_at
     });
   });
+
+  socket.on("messageDeletedGlobalChat", (data) => {
+    const { messageId } = data;
+    console.log(`Message deleted: ${messageId}`);
+
+    // Notify all clients in the global chat room that the message was deleted
+    io.to('globalChat').emit("messageDeleted", { messageId });
+  });
+  
 });
 
 server.listen(port, () => {

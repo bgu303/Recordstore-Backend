@@ -274,4 +274,21 @@ router.get("/chatmessagechecker/:conversationid", (req, res) => {
     })
 })
 
+router.delete("/deletefromglobalchat/:id", authenticateAdminToken, (req, res) => {
+    const messageId = req.params.id;
+    const query = "DELETE FROM global_messages WHERE id = ?";
+
+    dbConnection.query(query, [messageId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Id not found." });
+        }
+        res.json({ success: true, message: "message deleted successfully" });
+        console.log(`Message deleted with id: ${messageId}`);
+    })
+})
+
 module.exports = router;
