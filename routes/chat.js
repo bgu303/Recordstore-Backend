@@ -96,6 +96,42 @@ router.post("/adminsendmessage", authenticateAdminToken, (req, res) => {
     })
 })
 
+router.post("/sendmessageglobal", authenticateToken, (req, res) => {
+    const userId = req.body.userId;
+    const message = req.body.message;
+
+    const query = "INSERT INTO global_messages (user_id, message) VALUES (?, ?)";
+
+    dbConnection.query(query, [userId, message], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (results.affectedRows === 1) {
+            console.log("Message Sent successfully");
+            return res.status(201).json({ success: true, message: "Message sent successfully." })
+        }
+    })
+})
+
+router.get("/getglobalmessages", (req, res) => {
+    const query = `
+    SELECT gm.id, gm.message, gm.created_at, gm.user_id, ru.user_nickname
+    FROM global_messages gm
+    JOIN recordstoreusers ru ON gm.user_id = ru.id
+    ORDER BY gm.created_at ASC
+`;
+
+    dbConnection.query(query, (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        } else {
+            res.json(results);
+        }
+    });
+});
+
 router.post("/sendautomatedmessage", authenticateToken, (req, res) => {
     const conversationId = req.body.conversationId;
     const message = req.body.message;

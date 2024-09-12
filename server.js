@@ -65,6 +65,23 @@ io.on('connection', (socket) => {
     console.log(`Message was sent ${message} in conversation ${conversationId} with token ${socket.id}`);
     io.to(conversationId).emit("message", data)
   });
+
+  socket.on("joinGlobalChat", () => {
+    socket.join('globalChat'); // Use a room name if needed
+    console.log("User joined Global Chat");
+  });
+
+  socket.on("sendMessageGlobalChat", (data) => {
+    const { message, sender_id, sender_nickname, created_at } = data;
+    console.log(`Message received: ${message} from ${sender_id}`);
+
+    io.to('globalChat').emit("message", {
+      message,
+      user_id: sender_id,
+      user_nickname: sender_nickname,
+      created_at
+    });
+  });
 });
 
 server.listen(port, () => {
