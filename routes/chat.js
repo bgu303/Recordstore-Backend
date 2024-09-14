@@ -109,7 +109,7 @@ router.post("/sendmessageglobal", authenticateToken, (req, res) => {
         }
         if (results.affectedRows === 1) {
             console.log("Message Sent successfully");
-            return res.status(201).json({ success: true, message: "Message sent successfully." })
+            return res.status(201).json({ success: true, message: "Message sent successfully.", message_id: results.insertId })
         }
     })
 })

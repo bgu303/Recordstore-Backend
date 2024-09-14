@@ -15,4 +15,12 @@ const dbConnection = mysql.createConnection({
     database: databaseNameCloud
 });
 
+/* const dbConnection = mysql.createConnection({
+    host: "localhost",
+    user: username,
+    password: password,
+    port: 3306,
+    database: databaseName
+}); */
+
 module.exports = dbConnection

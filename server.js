@@ -72,14 +72,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on("sendMessageGlobalChat", (data) => {
-    const { message, sender_id, sender_nickname, created_at } = data;
+    const { message, sender_id, sender_nickname, created_at, message_id } = data;
     console.log(`Message received: ${message} from ${sender_id}`);
 
     io.to('globalChat').emit("sendMessageGlobalChat", {
       message,
       user_id: sender_id,
       user_nickname: sender_nickname,
-      created_at
+      created_at,
+      message_id
     });
   });
 
