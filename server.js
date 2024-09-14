@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on("joinGlobalChat", () => {
-    socket.join('globalChat'); // Use a room name if needed
+    socket.join('globalChat');
     console.log("User joined Global Chat");
   });
 
@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
     const { message, sender_id, sender_nickname, created_at } = data;
     console.log(`Message received: ${message} from ${sender_id}`);
 
-    io.to('globalChat').emit("message", {
+    io.to('globalChat').emit("sendMessageGlobalChat", {
       message,
       user_id: sender_id,
       user_nickname: sender_nickname,
@@ -90,7 +90,6 @@ io.on('connection', (socket) => {
     // Notify all clients in the global chat room that the message was deleted
     io.to('globalChat').emit("messageDeleted", { messageId });
   });
-  
 });
 
 server.listen(port, () => {
