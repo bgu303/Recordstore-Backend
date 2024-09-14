@@ -291,4 +291,25 @@ router.delete("/deletefromglobalchat/:id", authenticateAdminToken, (req, res) =>
     })
 })
 
+router.delete('/deletefromglobalchat/:userid/:id', authenticateToken, (req, res) => {
+    const userId = req.params.userid;
+    const messageId = req.params.id;
+
+    const query = `
+        DELETE FROM global_messages
+        WHERE id = ? AND user_id = ?`;
+
+    dbConnection.query(query, [messageId, userId], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Message not found or not authorized to delete this message."});
+        }
+        res.json({ success: true, message: "Message deleted successfully" });
+        console.log(`Message deleted with id: ${messageId} by user: ${userId}`);
+    });
+});
+
 module.exports = router;
