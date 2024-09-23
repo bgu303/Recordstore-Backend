@@ -13,7 +13,6 @@ const corsOptions = {
     "https://recordstore-front-v2.vercel.app",
     "https://www.poppimikko.com",
     "http://localhost:3000"
-
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -98,7 +97,7 @@ server.listen(port, () => {
 
   setInterval(async () => {
     try {
-      const response = await axios.delete(`https://recordstore-front-v2.vercel.app/shoppingcart/shoppingcarttimerdelete`);
+      const response = await axios.delete(`https://recordstore-backend-c7d360400245.herokuapp.com/shoppingcart/shoppingcarttimerdelete`);
       console.log(response.data);
     } catch (error) {
       console.error(error.message);

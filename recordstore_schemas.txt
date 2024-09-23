@@ -23,6 +23,7 @@ CREATE TABLE recordstoreusers (
   user_nickname VARCHAR(100) NOT NULL,
   user_role VARCHAR(50) NOT NULL,
   can_order BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (email),
   UNIQUE (id)
 );
