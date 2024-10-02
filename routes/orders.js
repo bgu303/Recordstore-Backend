@@ -23,7 +23,6 @@ router.get("/getorderdata", authenticateAdminToken, (req, res) => {
 
 router.get("/getorderdatabyid/:id", (req, res) => {
     const userId = req.params.id
-
     const query = `
         SELECT o.*, oi.record_id, r.artist, r.title, r.size, r.price, r.label
         FROM orders o
@@ -45,7 +44,7 @@ router.delete("/deleteorder/:id", authenticateAdminToken, (req, res) => {
     const orderId = req.params.id;
     const getOrderItemsQuery = "SELECT record_id FROM order_items WHERE order_id = ?"
     const deleteOrderQuery = "DELETE FROM orders WHERE id = ?";
-    const updateOrderItemsQuery = "UPDATE rec SET sold = false WHERE id IN (?)";
+    const updateOrderItemsQuery = "UPDATE rec SET sold = false, is_inshoppingcart = false WHERE id IN (?)";
 
     //First gets the record ids associated with the order (used to set status later)
     //Secondly, the order is deleted (order items will be deleted on order deletion)
@@ -114,7 +113,7 @@ router.delete("/deletefromorder/:orderId/:recordId", authenticateAdminToken, (re
     const { orderId, recordId } = req.params;
 
     const deleteOrderItemQuery = "DELETE FROM order_items WHERE order_id = ? AND record_id = ?";
-    const updateStatusQuery = "UPDATE rec SET sold = false WHERE id = ?";
+    const updateStatusQuery = "UPDATE rec SET sold = false, is_inshoppingcart = false WHERE id = ?";
 
     dbConnection.query(deleteOrderItemQuery, [orderId, recordId], (error, results) => {
         if (error) {
@@ -136,6 +135,5 @@ router.delete("/deletefromorder/:orderId/:recordId", authenticateAdminToken, (re
         });
     });
 });
-
 
 module.exports = router;

@@ -12,6 +12,7 @@ CREATE TABLE rec (
     year INT,
     shelf_space VARCHAR(255),
     sold BOOLEAN DEFAULT false,
+    is_inshoppingcart BOOLEAN DEFAULT false
     PRIMARY key (id)
 );
 

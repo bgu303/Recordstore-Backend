@@ -7,19 +7,19 @@ const { authenticateToken, authenticateAdminToken } = require("../middleware/aut
 function generateOrderId() {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numbers = "0123456789";
-    
+
     // Generate 3 random uppercase letters
     let randomLetters = "";
     for (let i = 0; i < 3; i++) {
         randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
     }
-    
+
     // Generate a random 3-digit number
     let randomNumbers = "";
     for (let i = 0; i < 3; i++) {
         randomNumbers += numbers.charAt(Math.floor(Math.random() * numbers.length));
     }
-    
+
     return `${randomLetters}-${randomNumbers}`;
 }
 
@@ -39,9 +39,9 @@ router.get("/shoppingcartitems/:id", (req, res) => {
 
 router.delete("/shoppingcartdelete/:id", authenticateToken, (req, res) => {
     const recordId = req.params.id;
-    const query = "DELETE FROM shoppingcart WHERE record_id = ?";
+    const deleteQuery = "DELETE FROM shoppingcart WHERE record_id = ?";
 
-    dbConnection.query(query, [recordId], (error, results) => {
+    dbConnection.query(deleteQuery, [recordId], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).json({ error: "Internal Server Error" });
@@ -49,10 +49,19 @@ router.delete("/shoppingcartdelete/:id", authenticateToken, (req, res) => {
         if (results.affectedRows === 0) {
             return res.status(404).json({ error: "Nothing deleted." });
         }
-        res.json({ success: true, message: "Record deleted successfully" });
-        console.log(`Record deleted with id: ${recordId}`);
-    })
-})
+
+        // After deleting from shoppingcart, update `is_inshoppingcart` to false
+        const updateQuery = "UPDATE rec SET is_inshoppingcart = false WHERE id = ?";
+        dbConnection.query(updateQuery, [recordId], (updateError, updateResults) => {
+            if (updateError) {
+                console.log(updateError);
+                return res.status(500).json({ error: "Error updating record in rec table" });
+            }
+            res.json({ success: true, message: "Record removed from cart and updated successfully" });
+            console.log(`Record deleted from cart and updated in rec with id: ${recordId}`);
+        });
+    });
+});
 
 router.delete("/shoppingcartdeleteall/:id", (req, res) => {
     const userId = req.params.id;
@@ -74,99 +83,76 @@ router.delete("/shoppingcartdeleteall/:id", (req, res) => {
 
 router.post("/addtocart", (req, res) => {
     const { userId, recordId } = req.body;
-    const query = "INSERT INTO shoppingcart (user_id, record_id) VALUES (?, ?)";
+    const insertQuery = "INSERT INTO shoppingcart (user_id, record_id) VALUES (?, ?)";
     const values = [userId, recordId];
 
-    dbConnection.query(query, values, (error, results) => {
+    dbConnection.query(insertQuery, values, (error, results) => {
         if (error) {
             if (error.errno === 1062) {
-                return res.status(501).json({ error: "Internal Server Error." });
+                return res.status(501).json({ error: "Item already in shopping cart." });
             } else {
-                console.log(error)
+                console.log(error);
                 return res.status(500).json({ error: "Internal Server Error." });
             }
         }
         if (results.affectedRows === 1) {
             console.log("Added to shopping cart successfully");
-            return res.status(201).json({ success: true, message: "Added to shopping cart successfully" });
+
+            // After adding to shoppingcart, update `is_inshoppingcart` to true
+            const updateQuery = "UPDATE rec SET is_inshoppingcart = true WHERE id = ?";
+            dbConnection.query(updateQuery, [recordId], (updateError, updateResults) => {
+                if (updateError) {
+                    console.log(updateError);
+                    return res.status(500).json({ error: "Error updating record in rec table" });
+                }
+                return res.status(201).json({ success: true, message: "Added to shopping cart and updated successfully" });
+            });
         }
-    })
-})
+    });
+});
 
 router.delete("/shoppingcarttimerdelete", (req, res) => {
     const currentTime = new Date();
-    const sixHoursAgo = new Date(currentTime.getTime() - 6 * 60 * 60 * 1000);
-    const query = "DELETE FROM shoppingcart WHERE added_at < ?";
+    const twentyFourHoursAgo = new Date(currentTime.getTime() - 24 * 60 * 60 * 1000);
+    const selectQuery = "SELECT record_id FROM shoppingcart WHERE added_at < ?";
+    const deleteQuery = "DELETE FROM shoppingcart WHERE added_at < ?";
 
-    dbConnection.query(query, [sixHoursAgo], (error, results) => {
-        if (error) {
-            console.log(error);
-            return res.status(500).json({ error: "Internal Server Error. " });
+    // Step 1: First, get all record_ids that will be deleted
+    dbConnection.query(selectQuery, [twentyFourHoursAgo], (selectError, selectResults) => {
+        if (selectError) {
+            console.log(selectError);
+            return res.status(500).json({ error: "Internal Server Error" });
         }
-        if (results.affectedRows === 0) {
-            console.log("Nothing deleted");
+
+        if (selectResults.length === 0) {
+            console.log("Nothing to delete.");
             return res.status(200).json({ success: `Nothing to be deleted. Current time: ${currentTime}` });
         }
-        res.json({ success: true, message: "Shoppingcart items deleted successfully." });
-        console.log("Shoppingcart items deleted successfully.");
-    })
-})
 
-router.post("/sendcart2", (req, res) => {
-    const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(SENDGRID_API_KEY);
+        // Get the record IDs that are going to be deleted
+        const recordIds = selectResults.map(row => row.record_id);
 
-    const { shoppingcart, customerInfo } = req.body;
-    let totalPrice = 0;
+        // Step 2: Delete records from shoppingcart
+        dbConnection.query(deleteQuery, [twentyFourHoursAgo], (deleteError, deleteResults) => {
+            if (deleteError) {
+                console.log(deleteError);
+                return res.status(500).json({ error: "Internal Server Error" });
+            }
 
-    let orderInfo = `
-        Tilaajan nimi: ${customerInfo.name}
-        Tilaajan puhelinnumero: ${customerInfo.phoneNumber}
-        Tilaajan sähköposti: ${customerInfo.email}
-        Tilaajan maksuvalinta: ${customerInfo.paymentOption}
-        Toimitustapa: ${customerInfo.shippingOption}
-        Tilaajan osoite:
-        ${customerInfo.address}
-    `
+            // Step 3: Update the corresponding records in the rec table
+            const updateQuery = "UPDATE rec SET is_inshoppingcart = false WHERE id IN (?)";
+            dbConnection.query(updateQuery, [recordIds], (updateError, updateResults) => {
+                if (updateError) {
+                    console.log(updateError);
+                    return res.status(500).json({ error: "Error updating records in rec table" });
+                }
 
-    const formattedItems = shoppingcart.map(item => {
-        totalPrice += item.price
-        return `
-        Artisti: ${item.artist}
-        Levyn nimi: ${item.title}
-        Koko: ${item.size}
-        Hinta: ${item.price}
-        ---------------------
-        `;
-    }).join('');
-
-    const textContent = `
-        Tilaajan tiedot:
-        ${orderInfo}
-
-        Ostoskorin sisältö:
-        ${formattedItems}
-
-        Yhteishinta:
-        ${totalPrice} euroa.
-    `;
-
-    const msg = {
-        to: 'jukkavesanto93@gmail.com',
-        from: 'mivesstore@gmail.com',
-        subject: 'Ostoskori',
-        text: textContent
-    }
-    sgMail
-        .send(msg)
-        .then(() => {
-            console.log('Email sent')
-            return res.status(201).json({ success: true, message: "Shoppingcart send successfully" });
-        })
-        .catch((error) => {
-            console.error(error)
-        })
-})
+                res.json({ success: true, message: "Shoppingcart items deleted and records updated successfully." });
+                console.log("Shoppingcart items deleted and rec records updated successfully.");
+            });
+        });
+    });
+});
 
 router.post("/sendcart", (req, res) => {
     const { customerInfo, userId, shoppingcart } = req.body;
