@@ -159,34 +159,36 @@ router.put("/editrecord", authenticateAdminToken, (req, res) => {
 
 router.get("/updatesoldstatustosold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
-    const query = "UPDATE rec SET sold = true WHERE id = ?";
+    const query = "UPDATE rec SET sold = true, is_inshoppingcart = true WHERE id = ?";
 
     dbConnection.query(query, [id], (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(501).json({ error: "Internal Server Error. " });
+            return res.status(501).json({ error: "Internal Server Error." });
         }
         if (results.affectedRows === 1) {
-            console.log("Sold status updated correctly.")
-            return res.status(201).json({ success: true, message: "Sold status updated correctly." });
+            console.log("Sold status and shopping cart status updated correctly.");
+            return res.status(201).json({ success: true, message: "Sold and shopping cart status updated correctly." });
         }
-    })
-})
+        return res.status(404).json({ error: "Record not found or update failed." });
+    });
+});
 
 router.get("/updatesoldstatustonotsold/:id", authenticateAdminToken, (req, res) => {
     const { id } = req.params;
-    const query = "UPDATE rec SET sold = false WHERE id = ?";
+    const query = "UPDATE rec SET sold = false, is_inshoppingcart = false WHERE id = ?";
 
     dbConnection.query(query, [id], (error, results) => {
         if (error) {
             console.log(error);
-            return res.status(501).json({ error: "Internal Server Error. " });
+            return res.status(501).json({ error: "Internal Server Error." });
         }
         if (results.affectedRows === 1) {
-            console.log("Sold status updated correctly.")
-            return res.status(201).json({ success: true, message: "Sold status updated correctly." });
+            console.log("Sold status and shopping cart status updated correctly.");
+            return res.status(201).json({ success: true, message: "Sold and shopping cart status updated correctly." });
         }
-    })
-})
+        return res.status(404).json({ error: "Record not found or update failed." });
+    });
+});
 
 module.exports = router;
